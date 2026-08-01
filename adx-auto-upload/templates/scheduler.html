@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}定时任务 - ADX-Auto{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">定时任务管理</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+        <i class="bi bi-plus-lg me-2"></i>创建任务
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>任务名</th>
+                        <th>类型</th>
+                        <th>Cron 表达式</th>
+                        <th>状态</th>
+                        <th>上次执行</th>
+                        <th>下次执行</th>
+                        <th>运行次数 / 错误次数</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td class="fw-medium">{{ job.name }}</td>
+                        <td><span class="badge bg-light text-dark">{{ job.type }}</span></td>
+                        <td><code>{{ job.cron }}</code></td>
+                        <td>
+                            {% if job.status == 'running' %}
+                            <span class="badge bg-success">运行中</span>
+                            {% elif job.status == 'paused' %}
+                            <span class="badge bg-warning text-dark">已暂停</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ job.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="small text-muted">{{ job.last_run|default("--") }}</td>
+                        <td class="small text-muted">{{ job.next_run|default("--") }}</td>
+                        <td>
+                            <span class="text-success">{{ job.run_count|default("0") }}</span>
+                            /
+                            <span class="text-danger">{{ job.error_count|default("0") }}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" title="立即执行">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                {% if job.status == 'running' %}
+                                <button class="btn btn-outline-warning" title="暂停">
+                                    <i class="bi bi-pause-fill"></i>
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-success" title="恢复">
+                                    <i class="bi bi-play-circle"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-outline-danger" title="删除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="bi bi-clock-history fs-1 text-muted d-block mb-2"></i>
+                            <p class="text-muted mb-1">暂无定时任务</p>
+                            <p class="text-muted small">点击"创建任务"按钮添加新的定时任务</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 创建任务模态框 -->
+<div class="modal fade" id="createTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>创建定时任务</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createTaskForm">
+                    <div class="mb-3">
+                        <label class="form-label">任务名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" required placeholder="输入任务名称">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">任务类型 <span class="text-danger">*</span></label>
+                        <select class="form-select" name="type" required>
+                            <option value="">选择类型</option>
+                            <option value="sync_accounts">同步账号</option>
+                            <option value="sync_campaigns">同步广告系列</option>
+                            <option value="scrape_landing_pages">爬取落地页</option>
+                            <option value="generate_creatives">生成创意</option>
+                            <option value="custom">自定义</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cron 表达式 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="cron" required placeholder="0 */6 * * *（每6小时）">
+                        <div class="form-text">格式：分 时 日 月 周，例如 0 8 * * * 表示每天8:00</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" form="createTaskForm" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>创建
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

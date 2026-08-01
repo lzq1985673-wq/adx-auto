@@ -1,0 +1,24 @@
+# ADX-Auto Render 部署配置文件
+# 使用此文件可在 Render 上一键部署网站
+# 详见 DEPLOY.md 部署指南
+
+services:
+  - type: web
+    name: adx-auto
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SQLALCHEMY_DATABASE_URI
+        value: sqlite:////var/data/adx_auto.db
+    disk:
+      name: adx-data
+      mountPath: /var/data
+      sizeGB: 1

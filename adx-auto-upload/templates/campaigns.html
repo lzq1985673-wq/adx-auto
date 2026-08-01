@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}广告系列 - ADX-Auto{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">广告系列管理</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCampaignModal">
+        <i class="bi bi-plus-lg me-2"></i>创建广告系列
+    </button>
+</div>
+
+<!-- 筛选栏 -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">按账号过滤</label>
+                <select class="form-select" id="accountFilter" name="account_id">
+                    <option value="">全部账号</option>
+                    {% for account in accounts %}
+                    <option value="{{ account.id }}" {% if selected_account == account.id %}selected{% endif %}>
+                        {{ account.name }} ({{ account.id }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">按状态过滤</label>
+                <select class="form-select" id="statusFilter" name="status">
+                    <option value="">全部状态</option>
+                    <option value="enabled" {% if selected_status == 'enabled' %}selected{% endif %}>启用</option>
+                    <option value="paused" {% if selected_status == 'paused' %}selected{% endif %}>暂停</option>
+                    <option value="removed" {% if selected_status == 'removed' %}selected{% endif %}>已删除</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-funnel me-1"></i>筛选
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 广告系列表格 -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>广告系列名称</th>
+                        <th>状态</th>
+                        <th>预算</th>
+                        <th>出价策略</th>
+                        <th>目标国家</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in campaigns %}
+                    <tr>
+                        <td>
+                            <a href="#" class="text-decoration-none fw-medium">{{ campaign.name }}</a>
+                            <br><small class="text-muted">{{ campaign.id }}</small>
+                        </td>
+                        <td>
+                            {% if campaign.status == 'enabled' %}
+                            <span class="badge bg-success">启用</span>
+                            {% elif campaign.status == 'paused' %}
+                            <span class="badge bg-warning text-dark">暂停</span>
+                            {% elif campaign.status == 'removed' %}
+                            <span class="badge bg-secondary">已删除</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark">{{ campaign.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ campaign.budget|default("--") }}</td>
+                        <td><span class="badge bg-light text-dark">{{ campaign.bidding_strategy|default("--") }}</span></td>
+                        <td>{{ campaign.target_country|default("--") }}</td>
+                        <td class="small text-muted">{{ campaign.created_at|default("--") }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                {% if campaign.status == 'enabled' %}
+                                <button class="btn btn-outline-warning" title="暂停">
+                                    <i class="bi bi-pause-circle"></i>
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-success" title="启用">
+                                    <i class="bi bi-play-circle"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="bi bi-megaphone fs-1 text-muted d-block mb-2"></i>
+                            <p class="text-muted mb-1">暂无广告系列</p>
+                            <p class="text-muted small">点击"创建广告系列"按钮开始</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 创建广告系列模态框 -->
+<div class="modal fade" id="createCampaignModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>创建广告系列</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createCampaignForm">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">广告系列名称 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name" required placeholder="输入广告系列名称">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">目标账号 <span class="text-danger">*</span></label>
+                            <select class="form-select" name="account_id" required>
+                                <option value="">选择账号</option>
+                                {% for account in accounts %}
+                                <option value="{{ account.id }}">{{ account.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">预算</label>
+                            <input type="number" class="form-control" name="budget" step="0.01" placeholder="每日预算">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">出价策略</label>
+                            <select class="form-select" name="bidding_strategy">
+                                <option value="MANUAL_CPC">手动点击</option>
+                                <option value="TARGET_CPA">目标CPA</option>
+                                <option value="TARGET_ROAS">目标ROAS</option>
+                                <option value="MAXIMIZE_CONVERSIONS">最大化转化</option>
+                                <option value="MAXIMIZE_CLICKS">最大化点击</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">目标国家</label>
+                            <input type="text" class="form-control" name="target_country" placeholder="如：US, UK, CA">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" form="createCampaignForm" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>创建
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

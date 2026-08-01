@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}创意管理 - ADX-Auto{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">创意管理</h4>
+
+<!-- 两栏布局：生成表单 + 结果展示 -->
+<div class="row g-4 mb-4">
+    <!-- 左栏：创意生成表单 -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightbulb me-2"></i>创意生成
+            </div>
+            <div class="card-body">
+                <form id="generateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">落地页 URL <span class="text-danger">*</span></label>
+                        <input type="url" class="form-control" name="landing_page_url" placeholder="https://example.com/landing-page" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">目标账号 <span class="text-danger">*</span></label>
+                        <select class="form-select" name="account_id" required>
+                            <option value="">选择账号</option>
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">目标国家 <span class="text-danger">*</span></label>
+                        <div class="row g-2">
+                            {% for country in countries %}
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="countries" value="{{ country.code }}" id="country_{{ country.code }}">
+                                    <label class="form-check-label small" for="country_{{ country.code }}">{{ country.name }}</label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">语言选择</label>
+                        <select class="form-select" name="language">
+                            <option value="zh">中文</option>
+                            <option value="en" selected>English</option>
+                            <option value="ja">日本語</option>
+                            <option value="ko">한국어</option>
+                            <option value="de">Deutsch</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Español</option>
+                            <option value="pt">Português</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-magic me-2"></i>爬取并生成
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右栏：生成结果展示 -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-list-check me-2"></i>生成结果</span>
+                <button class="btn btn-sm btn-success" id="submitToAdsBtn" disabled>
+                    <i class="bi bi-cloud-upload me-1"></i>提交到Google Ads
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- 标题列表 -->
+                <h6 class="fw-bold mb-2"><i class="bi bi-type-h1 me-1"></i>标题 <span class="badge bg-light text-dark" id="titleCount">0</span></h6>
+                <div class="mb-3" id="titleList">
+                    <div class="text-muted small text-center py-2">生成后在此显示标题</div>
+                </div>
+
+                <!-- 描述列表 -->
+                <h6 class="fw-bold mb-2"><i class="bi bi-text-left me-1"></i>描述 <span class="badge bg-light text-dark" id="descCount">0</span></h6>
+                <div class="mb-3" id="descList">
+                    <div class="text-muted small text-center py-2">生成后在此显示描述</div>
+                </div>
+
+                <!-- 关键词列表 -->
+                <h6 class="fw-bold mb-2"><i class="bi bi-tags me-1"></i>关键词 <span class="badge bg-light text-dark" id="keywordCount">0</span></h6>
+                <div id="keywordList">
+                    <div class="text-muted small text-center py-2">生成后在此显示关键词</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 历史任务列表 -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i>历史任务列表
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>任务ID</th>
+                        <th>落地页</th>
+                        <th>目标账号</th>
+                        <th>语言</th>
+                        <th>国家</th>
+                        <th>创意数</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td><code>{{ task.id }}</code></td>
+                        <td class="small text-truncate" style="max-width:180px;">{{ task.landing_page_url }}</td>
+                        <td>{{ task.account_name }}</td>
+                        <td>{{ task.language }}</td>
+                        <td>{{ task.countries }}</td>
+                        <td>{{ task.creative_count }}</td>
+                        <td>
+                            {% if task.status == 'completed' %}
+                            <span class="badge bg-success">已完成</span>
+                            {% elif task.status == 'running' %}
+                            <span class="badge bg-warning text-dark">进行中</span>
+                            {% elif task.status == 'failed' %}
+                            <span class="badge bg-danger">失败</span>
+                            {% else %}
+                            <span class="badge bg-secondary">待处理</span>
+                            {% endif %}
+                        </td>
+                        <td class="small text-muted">{{ task.created_at }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">暂无历史任务</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ADX-Auto{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #fff;
+            border-right: 1px solid #dee2e6;
+            padding-top: 1rem;
+        }
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.375rem;
+            margin-bottom: 0.15rem;
+            font-size: 0.9rem;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        .sidebar .nav-link i {
+            margin-right: 0.5rem;
+            width: 1.1em;
+            text-align: center;
+        }
+        .main-content {
+            padding: 1.5rem;
+            min-height: calc(100vh - 112px);
+        }
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border-radius: 0.5rem;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+        }
+        .footer {
+            background-color: #fff;
+            border-top: 1px solid #dee2e6;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        @media (max-width: 991.98px) {
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-rocket-takeoff me-2"></i>ADX-Auto
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-speedometer2 me-1"></i>仪表盘</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts"><i class="bi bi-people me-1"></i>账号管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/campaigns"><i class="bi bi-megaphone me-1"></i>广告系列</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/creatives"><i class="bi bi-lightbulb me-1"></i>创意管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/landing-pages"><i class="bi bi-globe me-1"></i>落地页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/scheduler"><i class="bi bi-clock-history me-1"></i>定时任务</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/settings"><i class="bi bi-gear me-1"></i>系统设置</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <span class="text-white me-3">
+                        <i class="bi bi-person-circle me-1"></i>{{ username|default("管理员") }}
+                    </span>
+                    <a href="/logout" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right me-1"></i>登出
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 左侧边栏 -->
+            <div class="col-lg-2 d-none d-lg-block sidebar">
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="/">
+                        <i class="bi bi-speedometer2"></i>仪表盘
+                    </a>
+                    <a class="nav-link {% if active_page == 'accounts' %}active{% endif %}" href="/accounts">
+                        <i class="bi bi-people"></i>账号管理
+                    </a>
+                    <a class="nav-link {% if active_page == 'campaigns' %}active{% endif %}" href="/campaigns">
+                        <i class="bi bi-megaphone"></i>广告系列
+                    </a>
+                    <a class="nav-link {% if active_page == 'creatives' %}active{% endif %}" href="/creatives">
+                        <i class="bi bi-lightbulb"></i>创意管理
+                    </a>
+                    <a class="nav-link {% if active_page == 'landing_pages' %}active{% endif %}" href="/landing-pages">
+                        <i class="bi bi-globe"></i>落地页
+                    </a>
+                    <a class="nav-link {% if active_page == 'scheduler' %}active{% endif %}" href="/scheduler">
+                        <i class="bi bi-clock-history"></i>定时任务
+                    </a>
+                    <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="/settings">
+                        <i class="bi bi-gear"></i>系统设置
+                    </a>
+                </nav>
+            </div>
+
+            <!-- 主内容区域 -->
+            <div class="col-lg-10 main-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 Footer -->
+    <footer class="footer text-center">
+        &copy; 2025 ADX-Auto &mdash; Google Ads 自动化投放管理平台
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

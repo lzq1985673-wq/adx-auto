@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}系统设置 - ADX-Auto{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">系统设置</h4>
+
+<div class="card">
+    <div class="card-body">
+        <!-- Tab 导航 -->
+        <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="ai-tab" data-bs-toggle="tab" data-bs-target="#ai-config" type="button" role="tab">
+                    <i class="bi bi-cpu me-1"></i>AI 配置
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="proxy-tab" data-bs-toggle="tab" data-bs-target="#proxy-config" type="button" role="tab">
+                    <i class="bi bi-shield-lock me-1"></i>代理配置
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="ads-tab" data-bs-toggle="tab" data-bs-target="#ads-config" type="button" role="tab">
+                    <i class="bi bi-google me-1"></i>Google Ads 配置
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab 内容 -->
+        <div class="tab-content">
+            <!-- AI 配置 -->
+            <div class="tab-pane fade show active" id="ai-config" role="tabpanel">
+                <form id="aiConfigForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">模型选择</label>
+                            <select class="form-select" name="model">
+                                <option value="gpt-4o" {% if ai_config.model == 'gpt-4o' %}selected{% endif %}>GPT-4o</option>
+                                <option value="gpt-4o-mini" {% if ai_config.model == 'gpt-4o-mini' %}selected{% endif %}>GPT-4o Mini</option>
+                                <option value="gpt-4-turbo" {% if ai_config.model == 'gpt-4-turbo' %}selected{% endif %}>GPT-4 Turbo</option>
+                                <option value="claude-3.5-sonnet" {% if ai_config.model == 'claude-3.5-sonnet' %}selected{% endif %}>Claude 3.5 Sonnet</option>
+                                <option value="claude-3-haiku" {% if ai_config.model == 'claude-3-haiku' %}selected{% endif %}>Claude 3 Haiku</option>
+                                <option value="gemini-pro" {% if ai_config.model == 'gemini-pro' %}selected{% endif %}>Gemini Pro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">API Key</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="api_key" value="{{ ai_config.api_key|default('') }}" placeholder="sk-...">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleApiKey">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">提示词模板</label>
+                            <textarea class="form-control" name="prompt_template" rows="8" placeholder="输入用于生成创意的提示词模板...">{{ ai_config.prompt_template|default('') }}</textarea>
+                            <div class="form-text">支持变量：{landing_page_title}, {landing_page_content}, {keywords}, {target_country}, {language}</div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>保存AI配置
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 代理配置 -->
+            <div class="tab-pane fade" id="proxy-config" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">代理供应商列表</h6>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addProxyModal">
+                        <i class="bi bi-plus-lg me-1"></i>添加代理
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>名称</th>
+                                <th>类型</th>
+                                <th>API 端点</th>
+                                <th>API Key</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proxy in proxies %}
+                            <tr>
+                                <td class="fw-medium">{{ proxy.name }}</td>
+                                <td><span class="badge bg-light text-dark">{{ proxy.type }}</span></td>
+                                <td class="small text-muted" style="max-width:250px;">{{ proxy.endpoint }}</td>
+                                <td class="small">
+                                    <code>{{ proxy.api_key[:8] }}***</code>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" title="编辑">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger" title="删除">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">暂未配置代理供应商</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Google Ads 配置 -->
+            <div class="tab-pane fade" id="ads-config" role="tabpanel">
+                <form id="adsConfigForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Developer Token</label>
+                            <input type="text" class="form-control" name="developer_token" value="{{ ads_config.developer_token|default('') }}" placeholder="输入 Developer Token">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Client ID</label>
+                            <input type="text" class="form-control" name="client_id" value="{{ ads_config.client_id|default('') }}" placeholder="输入 OAuth2 Client ID">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Client Secret</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="client_secret" value="{{ ads_config.client_secret|default('') }}" placeholder="输入 Client Secret">
+                                <button class="btn btn-outline-secondary" type="button" onclick="this.previousElementSibling.type = this.previousElementSibling.type === 'password' ? 'text' : 'password'">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Refresh Token</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="refresh_token" value="{{ ads_config.refresh_token|default('') }}" placeholder="输入 Refresh Token">
+                                <button class="btn btn-outline-secondary" type="button" onclick="this.previousElementSibling.type = this.previousElementSibling.type === 'password' ? 'text' : 'password'">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>保存Google Ads配置
+                            </button>
+                            <button type="button" class="btn btn-outline-success ms-2" id="testConnectionBtn">
+                                <i class="bi bi-plug me-1"></i>测试连接
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加代理模态框 -->
+<div class="modal fade" id="addProxyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-shield-lock me-2"></i>添加代理供应商</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProxyForm">
+                    <div class="mb-3">
+                        <label class="form-label">名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" required placeholder="如：快代理">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">类型 <span class="text-danger">*</span></label>
+                        <select class="form-select" name="type" required>
+                            <option value="">选择类型</option>
+                            <option value="http">HTTP</option>
+                            <option value="https">HTTPS</option>
+                            <option value="socks5">SOCKS5</option>
+                            <option value="rotating">轮转代理</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API 端点 <span class="text-danger">*</span></label>
+                        <input type="url" class="form-control" name="endpoint" required placeholder="https://proxy.example.com/api">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">API Key <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="api_key" required placeholder="输入 API Key">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" form="addProxyForm" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>添加
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 切换 API Key 显示/隐藏
+    const toggleBtn = document.getElementById('toggleApiKey');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            const input = this.closest('.input-group').querySelector('input');
+            const icon = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
