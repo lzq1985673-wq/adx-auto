@@ -1,0 +1,108 @@
+services:
+  - type: web
+    name: adx-auto
+    env: python
+    region: oregon  # Oregon (US West)
+    plan: starter  # starter for initial deploy, upgrade later
+    numInstances: 1
+    buildCommand: "chmod +x build.sh && ./build.sh"
+    startCommand: "cd backend && gunicorn -c gunicorn_config.py run:app"
+    rootDir: ./
+    healthCheckPath: /api/health
+    autoDeploy: true
+    
+    # Python build environment
+    buildFilter:
+      paths:
+        - backend/**
+        - frontend/**
+        - build.sh
+        - render.yaml
+    
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      
+      - key: PORT
+        value: 10000
+      
+      - key: PYTHON_VERSION
+        value: 3.11.4
+      
+      - key: NODE_VERSION
+        value: 20.10.0
+      
+      # Database - Use SQLite file (stored in Render disk)
+      - key: DATABASE_URL
+        value: sqlite:////opt/render/project/src/backend/adx_auto.db
+      
+      # Security - Generate these in Render dashboard after first deploy
+      - key: SECRET_KEY
+        generateValue: true
+      
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      
+      - key: FINGERPRINT_SALT
+        generateValue: true
+      
+      # App URL
+      - key: APP_URL
+        property: host
+      
+      # Default admin
+      - key: DEFAULT_ADMIN_PASSWORD
+        generateValue: true
+
+      # Google Ads API Config
+      - key: GOOGLE_ADS_DEVELOPER_TOKEN
+        value: 8WSsdnqyTc2QcY-ArtmgRQ
+      
+      # NOTE: 在 Render 面板手动设置以下密钥（不要提交到代码仓库）
+      # 1. 在 Google Cloud Console 创建 OAuth 2.0 客户端凭据
+      #    授权回调 URI: https://adx-auto.onrender.com/api/accounts/oauth/callback
+      - key: GOOGLE_CLIENT_ID
+        value: ''
+      
+      - key: GOOGLE_CLIENT_SECRET
+        value: ''
+      
+      - key: GOOGLE_REDIRECT_URI
+        value: https://adx-auto.onrender.com/api/accounts/oauth/callback
+      
+      - key: GOOGLE_ADS_API_VERSION
+        value: v17
+      
+      - key: GOOGLE_ADS_LOGIN_CUSTOMER_ID
+        value: ''
+
+      # AI Providers (optional, set in Render dashboard or 系统配置页)
+      - key: OPENAI_API_KEY
+        value: ''
+      - key: ANTHROPIC_API_KEY
+        value: ''
+      - key: GOOGLE_AI_API_KEY
+        value: ''
+      - key: DEEPSEEK_API_KEY
+        value: ''
+      - key: ZHIPU_API_KEY
+        value: ''
+      - key: MOONSHOT_API_KEY
+        value: ''
+      - key: QWEN_API_KEY
+        value: ''
+
+      # Default AI
+      - key: DEFAULT_AI_MODEL
+        value: gpt-3.5-turbo
+      - key: DEFAULT_AI_PROVIDER
+        value: openai
+
+# Redis for Celery tasks and caching (uncomment for scale)
+# services:
+#   - type: redis
+#     name: adx-auto-redis
+#     ipAllowList:
+#       - source: 0.0.0.0/0
+#         description: everywhere
+#     plan: free

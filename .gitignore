@@ -1,0 +1,63 @@
+# ============ Python ============
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+venv/
+env/
+ENV/
+.venv/
+
+# ============ Database ============
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# ============ Environment ============
+.env
+.env.local
+.env.*.local
+
+# ============ Node / Frontend ============
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============ Editor / OS ============
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============ Logs ============
+logs/
+*.log
+npm-debug.log*
+
+# ============ Uploads ============
+uploads/
+media/
+staticfiles/
+
+# ============ Testing ============
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# ============ Scheduler / Runtime ============
+*.pid
+*.sock
+celerybeat-schedule
