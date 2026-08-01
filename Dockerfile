@@ -14,7 +14,6 @@ RUN npm run build
 # ============================================
 FROM python:3.11-slim
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libffi-dev \
@@ -22,20 +21,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy and extract source code
 COPY app-source.tar.gz /tmp/
 RUN cd /tmp && tar xzf app-source.tar.gz && \
     cp -r /tmp/backend/* /app/ && \
     rm -rf /tmp/app-source.tar.gz
 
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy frontend build to Flask static directory
-RUN mkdir -p app/static
-COPY --from=frontend-builder /build/frontend/dist/* app/static/
+RUN mkdir -p frontend/dist
+COPY --from=frontend-builder /build/frontend/dist/* frontend/dist/
 
-# Environment variables
 ENV FLASK_ENV=production
 ENV PORT=5000
 ENV PYTHONUNBUFFERED=1
