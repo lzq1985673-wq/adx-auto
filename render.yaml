@@ -1,13 +1,11 @@
 services:
   - type: web
     name: adx-auto
-    env: python
+    env: docker
     region: oregon  # Oregon (US West)
     plan: starter  # starter for initial deploy, upgrade later
     numInstances: 1
-    buildCommand: "chmod +x build.sh && ./build.sh"
-    startCommand: "cd backend && gunicorn -c gunicorn_config.py run:app"
-    rootDir: ./
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     autoDeploy: true
     
@@ -16,25 +14,16 @@ services:
       paths:
         - backend/**
         - frontend/**
-        - build.sh
+        - Dockerfile
+        - app-source.tar.gz
         - render.yaml
     
     envVars:
       - key: FLASK_ENV
         value: production
       
-      - key: PORT
-        value: 10000
-      
-      - key: PYTHON_VERSION
-        value: 3.11.4
-      
-      - key: NODE_VERSION
-        value: 20.10.0
-      
-      # Database - Use SQLite file (stored in Render disk)
-      - key: DATABASE_URL
-        value: sqlite:////opt/render/project/src/backend/adx_auto.db
+      - key: ENABLE_SCHEDULER
+        value: 'true'
       
       # Security - Generate these in Render dashboard after first deploy
       - key: SECRET_KEY
